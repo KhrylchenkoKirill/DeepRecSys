@@ -1,5 +1,5 @@
 # DeepRecSys Course
-This a course on Deep Learning-based Recommender Systems taught in HSE University, academic year 2025/26.
+This is a course on Deep Learning-based Recommender Systems taught in HSE University, academic year 2025/26.
 
 ## Syllabus
 
