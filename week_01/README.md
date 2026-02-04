@@ -2,6 +2,7 @@
 ## Introduction to Recommender Systems
 
 Lecture by [Kirill Khrylchenko](https://github.com/KhrylchenkoKirill)
+
 Seminar by [Artem Matveev](https://github.com/matfu-pixel)
 
 In the first week of the course, we provide a gentle introduction to recommender systems:
