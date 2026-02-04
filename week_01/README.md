@@ -5,6 +5,10 @@ Lecture by [Kirill Khrylchenko](https://github.com/KhrylchenkoKirill)
 
 Seminar by [Artem Matveev](https://github.com/matfu-pixel)
 
+Youtube links:
+* [lecture](https://www.youtube.com/watch?v=bIc58LpxLrs)
+* seminar (TODO)
+
 In the first week of the course, we provide a gentle introduction to recommender systems:
 1. Information Overload - why we use recommender systems and what value they bring to both users and content creators.
 2. What do we optimize? - introducing the third stakeholder, the platform: the engineers and product teams behind the recommender system, and what drives their decisions (spoiler: revenue).
