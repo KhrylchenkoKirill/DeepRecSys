@@ -1,0 +1,14 @@
+# Data
+datasets>=2.0.0
+polars>=0.20.0
+pyarrow>=14.0.0
+numpy>=1.24.0
+
+# ML
+torch>=2.0.0
+
+# Visualization
+matplotlib>=3.5.0
+
+# Notebook (optional)
+jupyter>=1.0.0
