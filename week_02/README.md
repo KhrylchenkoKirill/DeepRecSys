@@ -6,8 +6,8 @@ Lecture by [Kirill Khrylchenko](https://github.com/KhrylchenkoKirill)
 Seminar by [Vladimir Baikalov](https://github.com/NonameUntitled)
 
 Youtube:
-* lecture (TODO)
-* seminar (TODO)
+* [lecture](https://www.youtube.com/watch?v=2CLyLE3oOTQ)
+* [seminar](https://www.youtube.com/watch?v=q55mPzvw-AM)
 
 This week we continue our journey through recommender systems from a more classical perspective and focus on the ML design of real-world recommender systems.
 
