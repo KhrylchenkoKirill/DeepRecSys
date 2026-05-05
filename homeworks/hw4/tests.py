@@ -1,5 +1,6 @@
 import math
 
+import numpy as np
 import polars as pl
 import torch
 import torch.nn as nn
@@ -1165,77 +1166,75 @@ def test_eval(eval_fn):
             rows = [self.scores_by_uid[int(uid.item())] for uid in inputs["uid"]]
             return torch.stack(rows, dim=0).to(inputs["uid"].device)
 
+    def _scores_top3_ordered(i: int, j: int, k: int, n: int) -> torch.Tensor:
+        """Scores so `torch.topk(..., k=3)` yields item ids [i, j, k] (descending score)."""
+        t = torch.zeros(n, dtype=torch.float32)
+        t[i] = 3.0
+        t[j] = 2.0
+        t[k] = 1.0
+        return t
+
+    catalog_size = 100
+    topk = 3
+
     scores_by_uid = {
-        1: torch.tensor([0.1, 0.2, 0.9, 0.3, 0.0]),
-        2: torch.tensor([0.8, 0.1, 0.2, 0.0, 0.3]),
-        3: torch.tensor([0.0, 0.4, 0.5, 0.2, 0.1]),
+        7: _scores_top3_ordered(1, 3, 4, catalog_size),
+        8: _scores_top3_ordered(10, 9, 11, catalog_size),
     }
     model = DummyModel(scores_by_uid)
     model.train()  # eval_fn must switch it to eval mode
 
     dataloader = [
         {
-            "uid": torch.tensor([1, 2], dtype=torch.long),
+            "uid": torch.tensor([7, 8], dtype=torch.long),
             "length": torch.tensor([2, 2], dtype=torch.long),
-            "history": torch.tensor([10, 11, 12, 13], dtype=torch.long),
-        },
-        {
-            "uid": torch.tensor([3], dtype=torch.long),
-            "length": torch.tensor([1], dtype=torch.long),
-            "history": torch.tensor([14], dtype=torch.long),
+            "history": torch.tensor([1001, 1002, 1003, 1004], dtype=torch.long),
         },
     ]
 
-    fake_targets = {1: [2], 2: [4], 3: [1]}
-    expected_candidates = {
-        1: [2, 3],
-        2: [0, 4],
-        3: [2, 1],
-    }
+    test_targets = {7: [1, 2], 8: [9]}
+    expected_candidates = {7: [1, 3, 4], 8: [10, 9, 11]}
     expected_metrics = {
-        "hitrate": 0.5,
-        "recall": 0.25,
-        "ndcg": 0.2,
-        "coverage": 0.4,
+        "hitrate": 1.0,
+        "recall": 0.75,
+        "ndcg": 0.622038473168458,
+        "coverage": 0.06,
     }
 
-    observed = {}
+    evaluate_call: dict[str, object] = {}
 
-    def fake_evaluate(*, targets, candidates, topk, catalog_size):
-        observed["targets"] = targets
-        observed["candidates"] = candidates
-        observed["topk"] = topk
-        observed["catalog_size"] = catalog_size
+    def oracle_evaluate(*, targets, candidates, topk: int, catalog_size: int):
+        evaluate_call["targets"] = targets
+        evaluate_call["candidates"] = candidates
+        evaluate_call["topk"] = topk
+        evaluate_call["catalog_size"] = catalog_size
         return expected_metrics
 
-    g = eval_fn.__globals__
-    old_evaluate = g.get("evaluate")
-    old_targets = g.get("targets")
-    g["evaluate"] = fake_evaluate
-    g["targets"] = fake_targets
-    try:
-        metrics = eval_fn(
-            dataloader=dataloader,
-            model=model,
-            catalog_size=5,
-            topk=2,
-            device="cpu",
-        )
-    finally:
-        if old_evaluate is None:
-            g.pop("evaluate", None)
-        else:
-            g["evaluate"] = old_evaluate
-        if old_targets is None:
-            g.pop("targets", None)
-        else:
-            g["targets"] = old_targets
+    metrics = eval_fn(
+        dataloader=dataloader,
+        model=model,
+        catalog_size=catalog_size,
+        topk=topk,
+        device="cpu",
+        targets=test_targets,
+        evaluate_fn=oracle_evaluate,
+    )
 
-    assert metrics == expected_metrics
-    assert observed["targets"] == fake_targets
-    assert observed["candidates"] == expected_candidates
-    assert observed["topk"] == 2
-    assert observed["catalog_size"] == 5
+    assert evaluate_call["targets"] == test_targets
+    assert evaluate_call["candidates"] == expected_candidates
+    assert evaluate_call["topk"] == topk
+    assert evaluate_call["catalog_size"] == catalog_size
+
+    for key in ("hitrate", "recall", "ndcg", "coverage"):
+        assert key in metrics, f"missing metric {key}"
+        assert 0.0 <= metrics[key] <= 1.0, f"{key} out of [0, 1]"
+    assert (
+        np.isclose(metrics["hitrate"], 1.0)
+        and np.isclose(metrics["recall"], 0.75)
+        and np.isclose(metrics["ndcg"], 0.622038473168458)
+        and np.isclose(metrics["coverage"], 0.06)
+    ), "'eval' returned unexpected metric values"
+
     assert model.training is False, "eval_fn must call model.eval()"
     assert model.grad_enabled_flags and all(
         not flag for flag in model.grad_enabled_flags
