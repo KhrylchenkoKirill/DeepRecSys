@@ -31,7 +31,7 @@ This is a course on Deep Learning-based Recommender Systems taught at HSE Univer
 
 -----
 
-This work is licensed under a
+This work by Kirill Khrylchenko is licensed under a
 [Creative Commons Attribution 4.0 International License][cc-by].
 
 [![CC BY 4.0][cc-by-image]][cc-by]
