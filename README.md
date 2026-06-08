@@ -29,7 +29,7 @@ This is a course on Deep Learning-based Recommender Systems taught at HSE Univer
 * [Margarita Mishustina](https://github.com/rita1302)
 * [Alexey Vasilev](https://github.com/AleXXL1986)
 
-Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
+-----
 
 This work is licensed under a
 [Creative Commons Attribution 4.0 International License][cc-by].
