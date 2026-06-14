@@ -150,6 +150,7 @@ def check_w2v_recs(metrics):
         ndcg=0.017,
         coverage=0.7
     )
+    print('All good! :)')
 
 
 def check_cf_recs(metrics):
